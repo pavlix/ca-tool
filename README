@@ -1,0 +1,7 @@
+ca-tool is a simple frontend to openssl.
+
+Right now it only supports creating RSA key pairs
+and printing out public and private keys.
+
+In future, it will support certificate authority management
+and will have a well-documented easy-to-use CLI.

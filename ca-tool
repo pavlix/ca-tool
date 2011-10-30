@@ -1,0 +1,77 @@
+#!/usr/bin/python3
+import os, sys
+
+PATH = os.path.join(os.getenv("HOME"), '.ca-tool')
+CONFIG_FILE = os.path.join(PATH, 'config')
+
+def run(args):
+    try:
+        command = args.pop(0)
+    except IndexError:
+        print_help()
+    else:
+        globals()['do_'+command.translate(str.maketrans('-_', '_!'))](args, {})
+
+def system(command):
+    print("Command: {}".format(command))
+    os.system(command)
+
+def do_init(args, options):
+    os.mkdir(PATH)
+
+def do_config(args, options):
+    try:
+        print(open(CONFIG_FILE).read())
+    except IOError as e:
+        print(e)
+
+def do_new_key(args, options):
+    try:
+        keyname = args.pop(0)
+        system("openssl genpkey -algorithm {algo} -out {path}/{name}.key -pkeyopt rsa_keygen_bits:{bits}".format(
+            algo = 'rsa',
+            path = PATH,
+            name = keyname,
+            bits = 4096,
+        ))
+    except IOError as e:
+        print(e)
+
+def do_print_private(args, options):
+    try:
+        keyname = args.pop(0)
+        system("openssl pkey -in {path}/{name}.key".format(
+            path = PATH,
+            name = keyname,
+        ))
+    except IOError as e:
+        print(e)
+    except IndexError:
+        print_help()
+
+def do_print_public(args, options):
+    try:
+        keyname = args.pop(0)
+        system("openssl pkey -in {path}/{name}.key -pubout".format(
+            path = PATH,
+            name = keyname,
+        ))
+    except IOError as e:
+        print(e)
+    except IndexError:
+        print_help()
+
+def print_help():
+    print("""\
+Usage: catool <command> <options>
+
+Commands:
+
+  new-key <name>
+  print-private <name>
+  print-public <name>
+
+""")
+
+if __name__ == '__main__':
+    run(sys.argv[1:])
